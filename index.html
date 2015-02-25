@@ -1,11 +1,181 @@
-<!DOCTYPE html>
+<!doctype html>
+<!-- modified from the firebase tutorial -->
 <html>
-	<head> 
-		<link rel='stylesheet' href='styles.css' />
-		<link href='http://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	</head>
-	<body>
-		<h2> Welcome #trainername!# </h2>
-	</body>
+  <head>
+    <script src='https://cdn.firebase.com/js/client/2.0.4/firebase.js'></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+    <link href='http://fonts.googleapis.com/css?family=Raleway:400,300' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pizza/0.2.1/js/pizza.js"></script>
+    <script type ="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pizza/0.2.1/js/vendor/dependencies.js"></script>
+    <link href = 'https://cdnjs.cloudflare.com/ajax/libs/pizza/0.2.1/css/pizza.css' media="screen, projector, print" rel="stylesheet" type="text/css"/>
+    <link href = 'https://cdnjs.cloudflare.com/ajax/libs/pizza/0.2.1/css/vendor/foundation.css' media="screen, projector, print" rel="stylesheet" type="text/css"/>
+    <link href = 'https://cdnjs.cloudflare.com/ajax/libs/pizza/0.2.1/css/vendor/normalize.css' media="screen, projector, print" rel="stylesheet" type="text/css"/>
+
+  </head>
+  <Title>
+    Safety Third SMBC
+  </Title>
+  <body>
+    <div id = "pollDiv">
+    <h1>The Food Poll</h1>
+    <ul data-pie-id = "bagelsOrPizza">
+      <li id = "0pizzasValue" data-value = "1">Pizza Rolls <span id = "pizzasNum">0%</span> </li>
+      <li id = "1bagelsValue" data-value = "1">Bagel Bites <span id = "bagelsNum">0%</span></li>
+
+    </ul>
+    <div id = "bagelsOrPizza"></div> 
+    </div>
+    <div id='messagesDiv'></div>
+    <input type='text' id='nameInput' placeholder='Kerberos'></input>
+    <br>
+    <input type='radio' name = "food" value = "bagel">Bagel Bites</input>
+    <input type='radio' name = "food" value = "pizza">Pizza Rolls</input>
+    <br>
+    <input type='submit' value = "Vote!" id = "submitFood"></input>
+    <div id = "message"></div>
+
+
+    <script>
+
+      var myDataRef = new Firebase('https://luminous-inferno-876.firebaseio.com/');
+      var Bagels = new Firebase('https://luminous-inferno-876.firebaseio.com/bagels');
+      var PizzaBase = new Firebase('https://luminous-inferno-876.firebaseio.com/pizza');
+      var Voters = new Firebase('https://luminous-inferno-876.firebaseio.com/voters');
+      var legals = [];
+      var votes = [];
+
+
+      myDataRef.once("value", function(snapshot){
+        vals = snapshot.val();
+        legals = vals['safeKerberoses'].split(' ');
+
+      });
+
+      myDataRef.on("value", function(snapshot){
+        vals = snapshot.val();
+
+        //update votes
+        votes = [];
+        if(vals['voters']){
+            keys = Object.keys(vals['voters']); 
+            for(var i = 0; i < keys.length; i++){
+                votes.push(vals['voters'][keys[i]]['name']);
+            } 
+        }
+
+        //update graph
+        if(vals['bagels']){
+          bagelsNum = Object.keys(vals['bagels']).length;          
+        }
+        else{
+          bagelsNum = 0;
+        }
+        if(vals['pizza']){
+          pizzaNum = Object.keys(vals['pizza']).length;
+        }
+        else{
+          pizzaNum = 0;
+        }
+
+        if(bagelsNum != 0 || pizzaNum != 0){
+          bagelPercent = bagelsNum/(bagelsNum+pizzaNum);
+          pizzaPercent = pizzaNum/(bagelsNum+pizzaNum);
+          $('#bagelsNum').text(String(bagelPercent.toFixed(2)*100)+ '%');
+          $('#pizzasNum').text(String(pizzaPercent.toFixed(2)*100)+ '%');
+          Pizza.init(document.body, {show_percent: false, data: [pizzaNum, bagelsNum]});
+        };
+
+      })
+
+      $(document).keypress(function (e) {
+        if (e.keyCode == 13) {
+          submit();
+        }
+      });
+
+      $()
+      var submit = function(){
+          var name = $('#nameInput').val(); //name of person
+          var food = $('input[type=radio]:checked').val(); //description of episode
+          //myDataRef.push({name: name, text: text});
+          if(legals.indexOf(name) > 0 && votes.indexOf(name) < 0){
+            if(food == 'bagel'){
+              Bagels.push({name: name});
+              Voters.push({id: name, name: name});
+              $('#nameInput').val('');
+              $('#message').text('successfully saved');
+              $('#message').style({'color': 'green'});
+              $('#message').show();
+            }
+            else if(food == 'pizza'){
+              PizzaBase.push({name: name});
+              Voters.push({id: name, name: name});
+             $('#nameInput').val('');
+              $('#message').text('successfully saved');
+              $('#message').style({'color': 'green'});
+              $('#message').show();
+
+            }
+            else{
+              $('#message').text('please pick a food!');
+              $('#message').style({'color': 'red'});
+              $('#message').show();
+
+            }
+          }
+          else if (legals.indexOf(name) < 0){
+              $('#message').text('not a valid kerberos');
+              $('#message').style({'color': 'red'});
+              $('#message').show();
+
+          }
+          else if (votes.indexOf(name) > 0){
+              $('#message').text('you already voted!');
+              $('#message').style({'color': 'red'});
+              $('#message').show();
+
+          }
+      }
+
+      $('#submitFood').click(function(){
+        submit();
+      });
+
+    </script>
+  </body>
 </html>
+
+<style>
+body{
+  font-family: 'Raleway';
+  font-weight: 300;
+  text-align: center;
+}
+
+#bagelsOrPizza{
+  max-height: 50%;
+  max-width: 30%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+ul{
+  margin-bottom: 0px;
+}
+input[type=text]{
+  font-family:'Raleway';
+  max-width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+input[type=submit]{
+  font-family: 'Raleway';
+}
+
+#message{
+  font-weight: bold;
+  display: none;
+  margin-top: 5px;
+}
+</style>
