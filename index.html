@@ -43,6 +43,7 @@
       var Voters = new Firebase('https://luminous-inferno-876.firebaseio.com/voters');
       var legals = [];
       var votes = [];
+      var attempted = false;
 
 
       myDataRef.once("value", function(snapshot){
@@ -82,7 +83,7 @@
           pizzaPercent = pizzaNum/(bagelsNum+pizzaNum);
           $('#bagelsNum').text(String(bagelPercent.toFixed(2)*100)+ '%');
           $('#pizzasNum').text(String(pizzaPercent.toFixed(2)*100)+ '%');
-          Pizza.init(document.body, {show_percent: false, data: [pizzaNum, bagelsNum]});
+          Pizza.init(document.body, {data: [pizzaNum, bagelsNum]});
         };
 
       })
@@ -93,47 +94,55 @@
         }
       });
 
-      $()
+      $('#nameInput').keypress(function(e){
+        $('#message').hide();
+      })
       var submit = function(){
+          attempted = true;
           var name = $('#nameInput').val(); //name of person
           var food = $('input[type=radio]:checked').val(); //description of episode
           //myDataRef.push({name: name, text: text});
           if(legals.indexOf(name) > 0 && votes.indexOf(name) < 0){
-            if(food == 'bagel'){
-              Bagels.push({name: name});
-              Voters.push({id: name, name: name});
-              $('#nameInput').val('');
-              $('#message').text('successfully saved');
-              $('#message').style({'color': 'green'});
-              $('#message').show();
-            }
-            else if(food == 'pizza'){
-              PizzaBase.push({name: name});
-              Voters.push({id: name, name: name});
-             $('#nameInput').val('');
-              $('#message').text('successfully saved');
-              $('#message').style({'color': 'green'});
-              $('#message').show();
+                console.log(food);
+                if(food == 'bagel'){
+                  Bagels.push({name: name});
+                  Voters.push({id: name, name: name});
+                  $('#nameInput').val('');
+                  $('#message').text('successfully saved');
+                  $('#message').css('color', 'green');
+                  $('#message').show();
+                }
+                else if(food == 'pizza'){
+                  PizzaBase.push({name: name});
+                  Voters.push({id: name, name: name});
+                 $('#nameInput').val('');
+                  $('#message').text('successfully saved');
+                  $('#message').css('color', 'green');
+                  $('#message').show();
 
-            }
-            else{
-              $('#message').text('please pick a food!');
-              $('#message').style({'color': 'red'});
-              $('#message').show();
+                }
+                else{
+                  $('#message').text('please pick a food!');
+                  $('#message').css('color', 'red');
+                  $('#message').show();
 
-            }
+                }
           }
           else if (legals.indexOf(name) < 0){
               $('#message').text('not a valid kerberos');
-              $('#message').style({'color': 'red'});
+              $('#message').css('color', 'red');
               $('#message').show();
 
           }
           else if (votes.indexOf(name) > 0){
               $('#message').text('you already voted!');
-              $('#message').style({'color': 'red'});
+              $('#message').css('color', 'red');
               $('#message').show();
 
+          }else{
+            console.log(name)
+            console.log(legals.indexOf(name), votes.indexOf(name))
+            console.log(food)
           }
       }
 
