@@ -95,7 +95,10 @@
       });
 
       $('#nameInput').keypress(function(e){
-        $('#message').hide();
+        $('#message').hide(); 
+        if(e.keyCode == 13){
+          submit();
+        }
       })
       var submit = function(){
           attempted = true;
